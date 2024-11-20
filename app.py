@@ -7,6 +7,19 @@ import time
 from datetime import datetime
 from dotenv import load_dotenv
 import os
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+
+# CORS Configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Autoriser toutes les origines (ou spécifier une liste d'origines)
+    allow_credentials=True,
+    allow_methods=["*"],  # Autoriser toutes les méthodes HTTP (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Autoriser tous les en-têtes
+)
 
 # Charger les variables d'environnement
 load_dotenv()
@@ -18,7 +31,6 @@ COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 LOG_COLLECTION_NAME = os.getenv("LOG_COLLECTION_NAME")
 
 # Application FastAPI
-app = FastAPI()
 
 # Fonction utilitaire pour convertir les documents MongoDB
 def transform_mongo_document(doc):

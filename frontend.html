@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester - Application of big data project</title>
+    <p>Wandrille Dioubaté - Salah Boughanmi - Maelys Collomb - Matthieu Freire</p>
+
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #menu {
+            margin-bottom: 20px;
+        }
+        #menu button {
+            margin: 5px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #menu button:hover {
+            background-color: #0056b3;
+        }
+        .form-container {
+            display: none;
+        }
+        .form-container.active {
+            display: block;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        textarea, input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button.submit {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button.submit:hover {
+            background-color: #218838;
+        }
+        button.reset {
+            width: 100%;
+            padding: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button.reset:hover {
+            background-color: #c82333;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Tester</h1>
+
+    <!-- Menu -->
+    <div id="menu">
+        <button onclick="showForm('postForm')">POST</button>
+        <button onclick="showForm('putForm')">PUT</button>
+        <button onclick="showForm('getForm')">GET</button>
+        <button onclick="showForm('deleteForm')">DELETE</button>
+    </div>
+
+    <!-- POST Form -->
+    <div id="postForm" class="form-container">
+        <h2>POST - Create an entry</h2>
+        <label for="postBody">Request Body (JSON):</label>
+        <textarea id="postBody" oninput="autoResize(this)"></textarea>
+        <button class="submit" onclick="handlePost()">Submit POST</button>
+        <button class="reset" onclick="resetForm('postForm')">Reset</button>
+        <pre id="postResponse"></pre>
+    </div>
+
+    <!-- PUT Form -->
+    <div id="putForm" class="form-container">
+        <h2>PUT - Update an entry</h2>
+
+        <!-- SIRET Input -->
+        <label for="putSiret">SIRET (Entreprise ID):</label>
+        <input type="text" id="putSiret" placeholder="Enter SIRET" required>
+
+        <!-- JSON Body Input -->
+        <label for="putBody">Request Body (JSON):</label>
+        <textarea id="putBody" oninput="autoResize(this)"></textarea>
+        <button class="submit" onclick="handlePut()">Submit PUT</button>
+        <button class="reset" onclick="resetForm('putForm')">Reset</button>
+        <pre id="putResponse"></pre>
+    </div>
+
+    <!-- GET Form -->
+    <div id="getForm" class="form-container">
+        <h2>GET - Retrieve an entry</h2>
+        <label for="getSiret">SIRET:</label>
+        <input type="text" id="getSiret" placeholder="Enter SIRET">
+        <button class="submit" onclick="handleGet()">Submit GET</button>
+        <button class="reset" onclick="resetForm('getForm')">Reset</button>
+        <pre id="getResponse"></pre>
+    </div>
+
+    <!-- DELETE Form -->
+    <div id="deleteForm" class="form-container">
+        <h2>DELETE - Remove an entry</h2>
+        <label for="deleteSiret">SIRET:</label>
+        <input type="text" id="deleteSiret" placeholder="Enter SIRET">
+        <button class="submit" onclick="handleDelete()">Submit DELETE</button>
+        <button class="reset" onclick="resetForm('deleteForm')">Reset</button>
+        <pre id="deleteResponse"></pre>
+    </div>
+
+    <script>
+        const apiUrl = 'http://127.0.0.1:8000'; // URL de l'API
+
+        // Afficher le formulaire sélectionné
+        function showForm(formId) {
+            const forms = document.querySelectorAll('.form-container');
+            forms.forEach(form => form.classList.remove('active'));
+            document.getElementById(formId).classList.add('active');
+        }
+
+        // Réinitialiser le formulaire et vider la réponse
+        function resetForm(formId) {
+            const form = document.getElementById(formId);
+            form.querySelectorAll('input, textarea').forEach(input => input.value = '');
+            document.getElementById(formId + 'Response').textContent = '';
+        }
+
+        // Redimensionner le textarea en fonction du contenu
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight) + 'px';
+        }
+
+        // Effectuer une requête POST
+        async function handlePost() {
+            const body = document.getElementById('postBody').value;
+            try {
+                const response = await fetch(`${apiUrl}/enterprise`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body
+                });
+
+                const jsonResponse = await response.json();
+                document.getElementById('postResponse').textContent = JSON.stringify(jsonResponse, null, 2);
+            } catch (error) {
+                document.getElementById('postResponse').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Effectuer une requête PUT
+        async function handlePut() {
+            const siret = document.getElementById('putSiret').value;  // Récupérer le SIRET
+            const body = document.getElementById('putBody').value;    // Récupérer le corps JSON
+            try {
+                const response = await fetch(`${apiUrl}/enterprise/${siret}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body
+                });
+
+                const jsonResponse = await response.json();
+                document.getElementById('putResponse').textContent = JSON.stringify(jsonResponse, null, 2);
+            } catch (error) {
+                document.getElementById('putResponse').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Effectuer une requête GET
+        async function handleGet() {
+            const siret = document.getElementById('getSiret').value;
+            try {
+                const response = await fetch(`${apiUrl}/enterprise/${siret}`, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    document.getElementById('getResponse').textContent = `Error: ${response.statusText}`;
+                    return;
+                }
+
+                const jsonResponse = await response.json();
+                document.getElementById('getResponse').textContent = JSON.stringify(jsonResponse, null, 2);
+            } catch (error) {
+                document.getElementById('getResponse').textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Effectuer une requête DELETE
+        async function handleDelete() {
+            const siret = document.getElementById('deleteSiret').value;
+            try {
+                const response = await fetch(`${apiUrl}/enterprise/${siret}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    document.getElementById('deleteResponse').textContent = `Error: ${response.statusText}`;
+                    return;
+                }
+
+                const jsonResponse = await response.json();
+                document.getElementById('deleteResponse').textContent = JSON.stringify(jsonResponse, null, 2);
+            } catch (error) {
+                document.getElementById('deleteResponse').textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
